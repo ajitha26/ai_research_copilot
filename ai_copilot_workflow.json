@@ -1,0 +1,85 @@
+{
+  "name": "AI Research Copilot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "query",
+        "responseMode": "lastNode"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "query",
+        "vectorDatabase": "pinecone",
+        "indexName": "researchindex",
+        "query": "={{$json[\"body\"][\"question\"]}}",
+        "topK": 3
+      },
+      "name": "VectorDB Query",
+      "type": "n8n-nodes-base.pinecone",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini",
+        "input": "Answer the following question using context:\n\nContext: {{$json[\"results\"]}}\n\nQuestion: {{$json[\"body\"][\"question\"]}}",
+        "temperature": 0.7
+      },
+      "name": "Gemini LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "statusCode": 200,
+        "responseBody": "={{$node[\"Gemini LLM\"].json[\"answer\"]}}"
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "VectorDB Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VectorDB Query": {
+      "main": [
+        [
+          {
+            "node": "Gemini LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini LLM": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
