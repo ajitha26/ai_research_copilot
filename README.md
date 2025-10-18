@@ -1,3 +1,4 @@
+#ai-research-copilot
 ---
 
 ## Project overview
