@@ -1,4 +1,4 @@
-#ai-research-copilot
+Ai-Research-Copilot
 ---
 
 ## Project overview
